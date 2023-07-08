@@ -4,6 +4,8 @@
 use App\Http\Livewire\Tweet\Create;
 use App\Models\User;
 use App\Models\Tweet;
+
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 it('should be able to creat a tweet', function () {
@@ -24,7 +26,21 @@ it('should be able to creat a tweet', function () {
         ->toBe('This is my first tweet');
 });
 
-todo('should make sure that only authenticated users can tweet');
+it('should make sure that only authenticated users can tweet', function () {
+    livewire(Create::class)
+        ->set('body', 'This is my first tweet')
+        ->call('tweet')
+        ->assertForbidden();
+
+    actingAs(User::factory()->create());
+
+    livewire(Create::class)
+        ->set('body', 'This is my first tweet')
+        ->call('tweet')
+        ->assertEmitted('tweet::created');
+
+
+});
 
 todo('body is required');
 
